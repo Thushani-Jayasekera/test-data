@@ -1,0 +1,57 @@
+# This spec intentionally violates several governance rules for testing:
+# - No contact in info
+# - No description in info
+# - Missing operationIds
+# - HTTP verb in path (/getPets)
+# - No server description
+# - Response content missing schema
+
+openapi: "3.0.3"
+info:
+  title: Broken Petstore API
+  version: "1.0.0"
+servers:
+  - url: https://api.petstore.example.com/v1
+paths:
+  /getPets:
+    get:
+      summary: List all pets
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of pets.
+          content:
+            application/json: {}
+  /createPet:
+    post:
+      summary: Create a pet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+      responses:
+        "201":
+          description: Pet created.
+          content:
+            application/json: {}
+  /Pets/{petId}:
+    get:
+      summary: Get pet
+      parameters:
+        - name: petId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A pet.

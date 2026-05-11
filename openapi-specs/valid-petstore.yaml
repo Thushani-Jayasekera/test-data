@@ -1,0 +1,123 @@
+openapi: "3.0.3"
+info:
+  title: Petstore API
+  version: "1.0.0"
+  description: A simple petstore REST API to test governance rules.
+  contact:
+    name: API Support
+    email: support@petstore.example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+servers:
+  - url: https://api.petstore.example.com/api/v1
+    description: Production server
+paths:
+  /pets:
+    get:
+      operationId: listPets
+      summary: List all pets
+      description: Returns a paginated list of all pets in the store.
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: A list of pets.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pet"
+    post:
+      operationId: createPet
+      summary: Create a pet
+      description: Adds a new pet to the store.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewPet"
+      responses:
+        "201":
+          description: Pet created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+  /pets/{pet_id}:
+    get:
+      operationId: getPetById
+      summary: Get a pet by ID
+      description: Returns a single pet by its unique ID.
+      parameters:
+        - name: pet_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A pet.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pet"
+        "404":
+          description: Pet not found.
+    delete:
+      operationId: deletePet
+      summary: Delete a pet
+      description: Removes a pet from the store by ID.
+      parameters:
+        - name: pet_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Pet deleted.
+components:
+  securitySchemes:
+    default:
+      type: oauth2
+      description: >-
+        OAuth 2.0 authorization using authorization code flow with JWT bearer tokens.
+        This implementation conforms to RFC8725 to mitigate common JWT vulnerabilities,
+        including algorithm confusion attacks and the use of weak algorithms.
+      flows:
+        authorizationCode:
+          authorizationUrl: https://auth.petstore.example.com/oauth/authorize
+          tokenUrl: https://auth.petstore.example.com/oauth/token
+          refreshUrl: https://auth.petstore.example.com/oauth/token
+          scopes:
+            read:pets: Read access to pet resources
+            write:pets: Write access to pet resources
+  schemas:
+    Pet:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [available, pending, sold]
+    NewPet:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+        status:
+          type: string

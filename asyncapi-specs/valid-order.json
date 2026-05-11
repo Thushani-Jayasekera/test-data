@@ -1,0 +1,128 @@
+{
+  "asyncapi": "2.6.0",
+  "info": {
+    "title": "Order Events API",
+    "version": "1.0.0",
+    "description": "Event-driven API for publishing and consuming order lifecycle events.",
+    "contact": {
+      "name": "Platform Team",
+      "email": "platform@orders.example.com"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "servers": {
+    "production": {
+      "url": "wss://broker.orders.example.com:9092",
+      "protocol": "wss",
+      "description": "Production Kafka broker for order events."
+    },
+    "staging": {
+      "url": "wss://broker-staging.orders.example.com:9092",
+      "protocol": "wss",
+      "description": "Staging Kafka broker for testing order events."
+    }
+  },
+  "channels": {
+    "order/placed": {
+      "description": "Channel for events when a new order is placed by a customer.",
+      "publish": {
+        "operationId": "onOrderPlaced",
+        "description": "Triggered when a customer places a new order.",
+        "message": {
+          "contentType": "application/json",
+          "description": "Payload representing a new order.",
+          "payload": {
+            "type": "object",
+            "required": ["orderId", "customerId", "items"],
+            "properties": {
+              "orderId": {
+                "type": "string"
+              },
+              "customerId": {
+                "type": "string"
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/OrderItem"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "order/shipped": {
+      "description": "Channel for events when an order has been shipped.",
+      "subscribe": {
+        "operationId": "receiveOrderShipped",
+        "description": "Consumed by fulfillment services when an order ships.",
+        "message": {
+          "contentType": "application/json",
+          "description": "Payload representing a shipped order.",
+          "payload": {
+            "type": "object",
+            "required": ["orderId", "trackingNumber"],
+            "properties": {
+              "orderId": {
+                "type": "string"
+              },
+              "trackingNumber": {
+                "type": "string"
+              },
+              "shippedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      }
+    },
+    "order/cancelled": {
+      "description": "Channel for events when an order is cancelled.",
+      "publish": {
+        "operationId": "onOrderCancelled",
+        "description": "Triggered when a customer or admin cancels an order.",
+        "message": {
+          "contentType": "application/json",
+          "description": "Payload representing a cancelled order.",
+          "payload": {
+            "type": "object",
+            "required": ["orderId", "reason"],
+            "properties": {
+              "orderId": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrderItem": {
+        "type": "object",
+        "required": ["productId", "quantity"],
+        "properties": {
+          "productId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "price": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

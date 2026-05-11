@@ -1,0 +1,139 @@
+asyncapi: "2.6.0"
+info:
+  title: Order Events API
+  version: "1.0.0"
+  description: Event-driven API for publishing and consuming order lifecycle events.
+  contact:
+    name: Platform Team
+    email: platform@orders.example.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+defaultContentType: application/json
+servers:
+  production:
+    url: broker.orders.example.com:9092
+    protocol: kafka
+    description: Production Kafka broker for order events.
+    bindings:
+      kafka: {}
+channels:
+  order/placed:
+    description: Channel for events when a new order is placed by a customer.
+    bindings:
+      kafka: {}
+    publish:
+      operationId: onOrderPlaced
+      summary: Publish order placed event
+      description: Triggered when a customer places a new order.
+      bindings:
+        kafka: {}
+      message:
+        $ref: "#/components/messages/OrderPlacedMessage"
+  order/shipped:
+    description: Channel for events when an order has been shipped.
+    bindings:
+      kafka: {}
+    subscribe:
+      operationId: receiveOrderShipped
+      summary: Consume shipped order events
+      description: Consumed by fulfillment services when an order ships.
+      bindings:
+        kafka: {}
+      message:
+        $ref: "#/components/messages/OrderShippedMessage"
+  order/cancelled:
+    description: Channel for events when an order is cancelled.
+    bindings:
+      kafka: {}
+    publish:
+      operationId: onOrderCancelled
+      summary: Publish cancelled order event
+      description: Triggered when a customer or admin cancels an order.
+      bindings:
+        kafka: {}
+      message:
+        $ref: "#/components/messages/OrderCancelledMessage"
+components:
+  messages:
+    OrderPlacedMessage:
+      name: OrderPlacedMessage
+      title: Order Placed Event
+      summary: Event emitted when a new order is placed
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - orderId
+          - customerId
+          - items
+        properties:
+          orderId:
+            type: string
+            description: Unique order identifier
+          customerId:
+            type: string
+            description: Unique customer identifier
+          items:
+            type: array
+            items:
+              $ref: "#/components/schemas/OrderItem"
+          createdAt:
+            type: string
+            format: date-time
+    OrderShippedMessage:
+      name: OrderShippedMessage
+      title: Order Shipped Event
+      summary: Event emitted when an order is shipped
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - orderId
+          - trackingNumber
+        properties:
+          orderId:
+            type: string
+          trackingNumber:
+            type: string
+          carrier:
+            type: string
+          shippedAt:
+            type: string
+            format: date-time
+    OrderCancelledMessage:
+      name: OrderCancelledMessage
+      title: Order Cancelled Event
+      summary: Event emitted when an order is cancelled
+      contentType: application/json
+      payload:
+        type: object
+        required:
+          - orderId
+          - reason
+        properties:
+          orderId:
+            type: string
+          reason:
+            type: string
+          cancelledBy:
+            type: string
+          cancelledAt:
+            type: string
+            format: date-time
+  schemas:
+    OrderItem:
+      type: object
+      required:
+        - productId
+        - quantity
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+        price:
+          type: number
+          format: double
+          minimum: 0

@@ -1,0 +1,38 @@
+# This spec intentionally violates several governance rules for testing:
+# - No servers defined
+# - No channel descriptions
+# - Missing operationIds
+# - Messages missing payload
+# - No info description or contact
+# - Server URL has trailing slash
+
+asyncapi: "2.6.0"
+info:
+  title: Broken Order Events API
+  version: "1.0.0"
+servers:
+  production:
+    url: broker.orders.example.com:9092/
+    protocol: kafka
+channels:
+  order_placed!@#:
+    publish:
+      message:
+        contentType: application/json
+  order.shipped:
+    subscribe:
+      operationId: receiveOrderShipped
+      message: {}
+  order/cancelled:
+    description: Cancelled orders channel.
+    publish:
+      operationId: onOrderCancelled
+      message:
+        payload:
+          type: object
+          properties:
+            orderId:
+              type: string
+components:
+  schemas:
+    EmptySchema: {}

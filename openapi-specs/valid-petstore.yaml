@@ -13,7 +13,7 @@ servers:
   - url: https://api.petstore.example.com/api/v1
     description: Production server
 paths:
-  /pets:
+  /petsona:
     get:
       operationId: listPets
       summary: List all pets
